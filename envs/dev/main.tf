@@ -2,8 +2,8 @@
 module "vpc" {
   source     = "../../modules/vpc"
   cidr_block = "10.0.0.0/16"
-  # egress     = var.egress
-  # ingress    = var.ingress
+  egress     = var.egress
+  ingress    = var.ingress
   tags = {
     Key   = "Name"
     Value = "dev-vpc"
@@ -19,7 +19,7 @@ module "elb" {
   listener                   = var.listener
   vpc_id                     = module.vpc.webapp_vpc_id
   target_grp                 = var.target_grp
-  security_group_ids         = [module.vpc.webapp_sg_ids]
+  security_group_ids         = [module.vpc.dev_elb_sg]
   asg_id                     = module.asg.asg_id
   subnet_ids                 = module.vpc.webapp_public_subnet_ids
   enable_deletion_protection = var.enable_deletion_protection

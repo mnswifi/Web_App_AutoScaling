@@ -1,5 +1,5 @@
 resource "aws_autoscaling_group" "webapp_asg" {
-  name                      = "name"
+  name                      = "ASG-dev"
   vpc_zone_identifier       = var.subnet_ids
   min_size                  = var.min_size
   max_size                  = var.max_size
@@ -25,7 +25,7 @@ resource "aws_autoscaling_group" "webapp_asg" {
 
 resource "aws_autoscaling_policy" "webapp_asg_policy" {
   name                   = "webapp-asg-test"
-  scaling_adjustment     = 4
+  scaling_adjustment     = 1
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 0
   autoscaling_group_name = aws_autoscaling_group.webapp_asg.name
@@ -35,6 +35,12 @@ resource "aws_launch_template" "dev_temp" {
   name                   = var.launch_configuration_name
   image_id               = var.ami_id
   instance_type          = var.instance_type
-  vpc_security_group_ids = var.security_group_ids
+  # vpc_security_group_ids = var.security_group_ids
   user_data              = var.user_data
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups = var.security_group_ids
+    # subnet_id = var.subnet_ids[*]
+  }
 }

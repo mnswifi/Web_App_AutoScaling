@@ -15,13 +15,13 @@ resource "aws_lb_listener" "elb_web" {
   protocol          = each.value.lb_protocol
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.elb_web_tg[0].arn
+    target_group_arn = aws_lb_target_group.elb_web_tg[each.key].arn
   }
 }
 
 resource "aws_lb_target_group" "elb_web_tg" {
   for_each = { for idx, target_grp in var.target_grp : idx => target_grp }
-  name     = var.tg_name
+  name     = "${var.tg_name}-${each.key}"
   port     = each.value.instance_port
   protocol = each.value.instance_protocol
   vpc_id   = var.vpc_id
