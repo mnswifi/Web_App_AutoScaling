@@ -1,3 +1,4 @@
+######################## Auto Scaling Group ############################
 resource "aws_autoscaling_group" "webapp_asg" {
   name                      = "ASG-dev"
   vpc_zone_identifier       = var.subnet_ids
@@ -23,6 +24,7 @@ resource "aws_autoscaling_group" "webapp_asg" {
   }
 }
 
+######################## Auto Scaling Policy ############################
 resource "aws_autoscaling_policy" "webapp_asg_policy" {
   name                   = "webapp-asg-test"
   scaling_adjustment     = 1
@@ -31,16 +33,16 @@ resource "aws_autoscaling_policy" "webapp_asg_policy" {
   autoscaling_group_name = aws_autoscaling_group.webapp_asg.name
 }
 
+
+######################## Launch Template ############################
 resource "aws_launch_template" "dev_temp" {
-  name                   = var.launch_configuration_name
-  image_id               = var.ami_id
-  instance_type          = var.instance_type
-  # vpc_security_group_ids = var.security_group_ids
-  user_data              = var.user_data
+  name          = var.launch_configuration_name
+  image_id      = var.ami_id
+  instance_type = var.instance_type
+  user_data     = var.user_data
 
   network_interfaces {
     associate_public_ip_address = false
-    security_groups = var.security_group_ids
-    # subnet_id = var.subnet_ids[*]
+    security_groups             = var.security_group_ids
   }
 }

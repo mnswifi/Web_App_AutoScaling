@@ -3,17 +3,17 @@ locals {
 }
 
 
-//1. create VPC
+####################### VPC ############################
 resource "aws_vpc" "webapp_vpc" {
   cidr_block           = var.cidr_block
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+  enable_dns_support   = var.enable_dns_support
+  enable_dns_hostnames = var.enable_dns_hostnames
   tags = {
     Name = "webapp-vpc"
   }
 }
 
-
+####################### Subnets ############################	
 resource "aws_subnet" "public_subnet" {
   vpc_id            = aws_vpc.webapp_vpc.id
   count             = length(local.azs)
@@ -35,7 +35,7 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-//3. Internet Gateway
+####################### Internet Gateway ############################
 resource "aws_internet_gateway" "webapp_igw" {
   vpc_id = aws_vpc.webapp_vpc.id
   tags = {
@@ -44,7 +44,7 @@ resource "aws_internet_gateway" "webapp_igw" {
 }
 
 
-//4. Route table for public subnet
+####################### Route Table ############################
 resource "aws_route_table" "webapp_pub_rt" {
   vpc_id = aws_vpc.webapp_vpc.id
   route {
@@ -57,7 +57,7 @@ resource "aws_route_table" "webapp_pub_rt" {
 }
 
 
-//5. Route table association with public subnet
+# Route table association with public subnet
 resource "aws_route_table_association" "pub_rt_association" {
   route_table_id = aws_route_table.webapp_pub_rt.id
   count          = length(local.azs)
@@ -65,24 +65,7 @@ resource "aws_route_table_association" "pub_rt_association" {
 }
 
 
-//6. Elastic IP
-resource "aws_eip" "web_nat_eip" {
-  domain     = "vpc"
-  depends_on = [aws_internet_gateway.webapp_igw]
-}
-
-//7. NAT Gateway
-resource "aws_nat_gateway" "webapp-nat-gateway" {
-  allocation_id = aws_eip.web_nat_eip.id
-  subnet_id     = element(aws_subnet.public_subnet[*].id, 0)
-  depends_on    = [aws_internet_gateway.webapp_igw]
-  tags = {
-    Name = "webapp-Nat Gateway"
-  }
-}
-
-
-//8. Route table for Private subnet
+# Route table association with private subnet
 resource "aws_route_table" "webapp_private_rt" {
   depends_on = [aws_nat_gateway.webapp-nat-gateway]
   vpc_id     = aws_vpc.webapp_vpc.id
@@ -96,14 +79,32 @@ resource "aws_route_table" "webapp_private_rt" {
 }
 
 
-//9. Route table association with private subnet
+# Route table association with private subnet
 resource "aws_route_table_association" "private_rt_association" {
   route_table_id = aws_route_table.webapp_private_rt.id
   count          = length(local.azs)
   subnet_id      = element(aws_subnet.private_subnet[*].id, count.index)
 }
 
+######################## Elastic IP and NAT Gateway ############################
+# Elastic IP for NAT Gateway
+resource "aws_eip" "web_nat_eip" {
+  domain     = "vpc"
+  depends_on = [aws_internet_gateway.webapp_igw]
+}
 
+# NAT Gateway
+resource "aws_nat_gateway" "webapp-nat-gateway" {
+  allocation_id = aws_eip.web_nat_eip.id
+  subnet_id     = element(aws_subnet.public_subnet[*].id, 0)
+  depends_on    = [aws_internet_gateway.webapp_igw]
+  tags = {
+    Name = "webapp-Nat Gateway"
+  }
+}
+
+####################### Security Group ############################
+# Security Group for Webapp
 resource "aws_security_group" "webapp_sg" {
   vpc_id = aws_vpc.webapp_vpc.id
   name   = var.sg_name
@@ -111,12 +112,12 @@ resource "aws_security_group" "webapp_sg" {
 }
 
 resource "aws_security_group_rule" "webapp_sg_ingress" {
-  for_each          = { for idx, ingress in var.ingress : idx => ingress }
-  type              = "ingress"
-  from_port         = each.value.from_port
-  to_port           = each.value.to_port
-  protocol          = each.value.protocol
-  security_group_id = aws_security_group.webapp_sg.id
+  for_each                 = { for idx, ingress in var.ingress : idx => ingress }
+  type                     = "ingress"
+  from_port                = each.value.from_port
+  to_port                  = each.value.to_port
+  protocol                 = each.value.protocol
+  security_group_id        = aws_security_group.webapp_sg.id
   source_security_group_id = aws_security_group.dev_elb_sg.id
 }
 
@@ -130,12 +131,13 @@ resource "aws_security_group_rule" "webapp_sg_egress" {
   cidr_blocks       = each.value.cidr_blocks
 }
 
+# Security Group for Dev ELB
 resource "aws_security_group" "dev_elb_sg" {
   name = "dev_lb_sg"
   ingress {
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -147,5 +149,5 @@ resource "aws_security_group" "dev_elb_sg" {
   }
 
   vpc_id = aws_vpc.webapp_vpc.id
-  tags = var.tags
+  tags   = var.tags
 }

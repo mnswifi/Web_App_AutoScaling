@@ -1,9 +1,11 @@
 ############################# VPC #########################################
 module "vpc" {
-  source     = "../../modules/vpc"
-  cidr_block = "10.0.0.0/16"
-  egress     = var.egress
-  ingress    = var.ingress
+  source               = "../../modules/vpc"
+  cidr_block           = "10.0.0.0/16"
+  egress               = var.egress
+  ingress              = var.ingress
+  enable_dns_hostnames = var.enable_dns_hostnames
+  enable_dns_support   = var.enable_dns_support
   tags = {
     Key   = "Name"
     Value = "dev-vpc"

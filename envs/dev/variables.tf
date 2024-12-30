@@ -1,3 +1,5 @@
+####################### VPC ############################
+
 variable "cidr_block" {
   description = "The CIDR block"
   type        = string
@@ -5,10 +7,9 @@ variable "cidr_block" {
 
 variable "ingress" {
   type = list(object({
-    from_port   = number
-    to_port     = number
-    protocol    = string
-    # cidr_blocks = list(string)
+    from_port = number
+    to_port   = number
+    protocol  = string
   }))
 }
 
@@ -21,6 +22,17 @@ variable "egress" {
   }))
 }
 
+variable "enable_dns_support" {
+  description = "If true, enable DNS support in the VPC"
+  type        = bool
+}
+
+variable "enable_dns_hostnames" {
+  description = "If true, enable DNS hostnames in the VPC"
+  type        = bool
+}
+
+
 
 ############################ ELB ###############################
 
@@ -30,7 +42,7 @@ variable "name" {
 }
 
 variable "internal" {
-  description = "The desc"
+  description = "The type of the ELB"
   type        = bool
 }
 

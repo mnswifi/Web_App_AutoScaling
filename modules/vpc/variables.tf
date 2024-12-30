@@ -20,17 +20,11 @@ variable "sg_name" {
   default     = "dev_vpc_sg"
 }
 
-# variable "type" {
-#   description = "The type of security group rule"
-#   type        = string
-# }
-
 variable "ingress" {
   type = list(object({
-    from_port   = number
-    to_port     = number
-    protocol    = string
-    # cidr_blocks = list(string)
+    from_port = number
+    to_port   = number
+    protocol  = string
   }))
 }
 
@@ -42,3 +36,14 @@ variable "egress" {
     cidr_blocks = list(string)
   }))
 }
+
+variable "enable_dns_support" {
+  description = "If true, enable DNS support in the VPC"
+  type        = bool
+}
+
+variable "enable_dns_hostnames" {
+  description = "If true, enable DNS hostnames in the VPC"
+  type        = bool
+}
+

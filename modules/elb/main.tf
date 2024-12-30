@@ -1,3 +1,4 @@
+################################ ELB #####################################
 resource "aws_lb" "elb_web" {
   name                       = var.name
   internal                   = var.internal
@@ -8,6 +9,7 @@ resource "aws_lb" "elb_web" {
   tags                       = var.tags
 }
 
+########################### ELB Listener ################################
 resource "aws_lb_listener" "elb_web" {
   for_each          = { for idx, listener in var.listener : idx => listener }
   load_balancer_arn = aws_lb.elb_web.arn
@@ -19,6 +21,7 @@ resource "aws_lb_listener" "elb_web" {
   }
 }
 
+########################### ELB Target Group #############################
 resource "aws_lb_target_group" "elb_web_tg" {
   for_each = { for idx, target_grp in var.target_grp : idx => target_grp }
   name     = "${var.tg_name}-${each.key}"
@@ -37,6 +40,7 @@ resource "aws_lb_target_group" "elb_web_tg" {
   }
 }
 
+########################### ELB Attachment ###############################
 resource "aws_autoscaling_attachment" "elb_attachment" {
   for_each               = aws_lb_target_group.elb_web_tg
   autoscaling_group_name = var.asg_id
