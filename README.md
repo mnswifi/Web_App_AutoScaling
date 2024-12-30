@@ -65,6 +65,6 @@ instance_type     = "t2.micro"
     ```
 
 ## Destroy
-```bash
+    ```bash
     terraform destroy -var-file={name}.tfvars
-```
+    ```
