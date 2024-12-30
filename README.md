@@ -65,6 +65,7 @@ instance_type     = "t2.micro"
     ```
 
 ## Destroy
+1. In the same `envs/dev` directory, run the following command to tear down resources.
     ```bash
     terraform destroy -var-file={name}.tfvars
     ```
