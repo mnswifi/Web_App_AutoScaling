@@ -51,15 +51,20 @@ instance_type     = "t2.micro"
 ```
 
 ## Deploy
-### Navigate to the folder directory `envs/dev` and execute the following command
 
-```bash
-terraform init
-terraform plan -var-file={name}.tfvars
-terraform apply -var-file={name}.tfvars
-```
+1. Navigate to the `backend-launch` directory and run the following commands to initialize and deploy the backend resources (S3 and DynamoDB):
+   ```bash
+   terraform init
+   terraform apply
+   ```
+2. Navigate to the `envs/dev` directory and execute the following commands:
+    ```bash
+    terraform init
+    terraform plan -var-file={name}.tfvars
+    terraform apply -var-file={name}.tfvars
+    ```
 
 ## Destroy
-```bash
-terraform destroy -var-file={name}.tfvars
-```
+    ```bash
+    terraform destroy -var-file={name}.tfvars
+    ```
