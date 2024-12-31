@@ -2,7 +2,8 @@
 
 ## Project Design
 
-![alt text](2-Tier-Design.png)
+![2-Tier-Design](https://github.com/user-attachments/assets/bfe8d3b4-d380-48e8-9973-5e4c4a7f6b0c)
+
 
 
 ## Usage - Sample tfvars
