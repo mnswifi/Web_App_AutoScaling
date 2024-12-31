@@ -65,41 +65,44 @@ resource "aws_route_table_association" "pub_rt_association" {
 }
 
 
-# Route table association with private subnet
+# Route table for private subnet
 resource "aws_route_table" "webapp_private_rt" {
+  count      = length(local.azs)
   depends_on = [aws_nat_gateway.webapp-nat-gateway]
   vpc_id     = aws_vpc.webapp_vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.webapp-nat-gateway.id
+    gateway_id = element(aws_nat_gateway.webapp-nat-gateway[*].id, count.index)
   }
   tags = {
-    Name = "Private subnet Route Table"
+    Name = "Private subnet Route Table ${count.index + 1}"
   }
 }
 
 
 # Route table association with private subnet
 resource "aws_route_table_association" "private_rt_association" {
-  route_table_id = aws_route_table.webapp_private_rt.id
   count          = length(local.azs)
+  route_table_id = element(aws_route_table.webapp_private_rt[*].id, count.index)
   subnet_id      = element(aws_subnet.private_subnet[*].id, count.index)
 }
 
 ######################## Elastic IP and NAT Gateway ############################
 # Elastic IP for NAT Gateway
 resource "aws_eip" "web_nat_eip" {
+  count      = length(local.azs)
   domain     = "vpc"
   depends_on = [aws_internet_gateway.webapp_igw]
 }
 
 # NAT Gateway
 resource "aws_nat_gateway" "webapp-nat-gateway" {
-  allocation_id = aws_eip.web_nat_eip.id
-  subnet_id     = element(aws_subnet.public_subnet[*].id, 0)
+  count         = length(local.azs)
+  allocation_id = element(aws_eip.web_nat_eip[*].id, count.index)
+  subnet_id     = element(aws_subnet.public_subnet[*].id, count.index)
   depends_on    = [aws_internet_gateway.webapp_igw]
   tags = {
-    Name = "webapp-Nat Gateway"
+    Name = "webapp-Nat Gateway ${count.index + 1}"
   }
 }
 
